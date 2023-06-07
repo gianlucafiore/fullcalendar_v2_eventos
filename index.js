@@ -336,9 +336,8 @@ const configuration_workflow = () =>
                 name: "limit_to_working_days",
                 type: "Bool",
                 label: "Limit to working days",
-                sublabel: "Only working days in week views",
                 sublabel:
-                  "Filter out Saturday and Sunday in views designed for weeks (dayGridWeek, timeGridWeek).",
+                  "Only working days in week views. Filter out Saturday and Sunday in views designed for weeks (dayGridWeek, timeGridWeek).",
                 required: false,
                 default: false,
               },
@@ -364,7 +363,8 @@ const configuration_workflow = () =>
   });
 
 const get_state_fields = async (table_id, viewname, { show_view }) => {
-  const table_fields = await Field.find({ table_id });
+  const table = Table.findOne(table_id);
+  const table_fields = await table.getFields();
   return table_fields.map((f) => {
     const sf = new Field(f);
     sf.required = false;
