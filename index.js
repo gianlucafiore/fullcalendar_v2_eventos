@@ -658,7 +658,6 @@ const run = async (
     },
     navLinks: true,
     initialView: '${initialView}',
-    ${custom_calendar_views ? custom_calendar_views + "," : ""}
     nowIndicator: ${nowIndicator},
     weekNumbers: ${weekNumbers},
     eventColor: '${default_event_color}',
@@ -865,6 +864,7 @@ const run = async (
     views: {
       dayGridWeek: dayGridWeekOpts,
       timeGridWeek: timeGridWeekOpts,
+      ${custom_calendar_views ? custom_calendar_views + "," : ""}
     },
   });
   calendar.render();`)
