@@ -359,6 +359,17 @@ const configuration_workflow = () =>
           });
         },
       },
+      {
+        name: "Other Calendars",
+        form: async (context) => {
+          const otherCalendars = (
+            await View.find({ viewtemplate: "Calendar" })
+          ).filter((view) => view.name !== context.viewname);
+          return new Form({
+            fields: otherCalendars.map((v) => ({ name: v.name, type: "Bool" })),
+          });
+        },
+      },
     ],
   });
 
@@ -419,6 +430,7 @@ const buildJoinFields = (event_color) => {
 };
 const eventFromRow = async (
   row,
+  tableId,
   alwaysAllDay,
   transferedState,
   eventView,
@@ -456,6 +468,7 @@ const eventFromRow = async (
     : undefined;
   return {
     title: row[title_field],
+    tableId,
     start,
     allDay,
     end,
@@ -482,6 +495,44 @@ const durationIsFloat = (fields, duration_field) => {
   const field = fields.find((f) => f.name === duration_field);
   if (!field) return false;
   else return field.type.name === "Float";
+};
+
+const addOtherCalendars = async (
+  events,
+  otherCalendars,
+  req,
+  state,
+  transferedState
+) => {
+  for (const otherCalendar of otherCalendars) {
+    const { table_id, configuration } = otherCalendar;
+    const table = await Table.findOne({ id: table_id });
+    const fields = await table.getFields();
+    readState(state, fields);
+    const qstate = await stateFieldsToWhere({ fields, state });
+    const rows = await table.getJoinedRows({
+      where: qstate,
+      joinFields: buildJoinFields(configuration.event_color),
+    });
+    const alwaysAllDay = configuration.allday_field === "Always";
+    const eventView = configuration.event_view
+      ? await View.findOne({ name: configuration.event_view })
+      : undefined;
+    const otherEvents = await Promise.all(
+      rows.map((row) =>
+        eventFromRow(
+          row,
+          table_id,
+          alwaysAllDay,
+          transferedState,
+          eventView,
+          req,
+          configuration
+        )
+      )
+    );
+    events.push(...otherEvents);
+  }
 };
 
 const run = async (
@@ -512,6 +563,7 @@ const run = async (
     reload_on_edit_in_pop_up,
     event_view,
     reload_on_drag_resize,
+    ...rest
   },
   state,
   extraArgs
@@ -524,6 +576,9 @@ const run = async (
     where: qstate,
     joinFields: buildJoinFields(event_color),
   });
+  const otherCalendars = (await View.find({ viewtemplate: "Calendar" })).filter(
+    (view) => view.name !== viewname && rest[view.name]
+  );
   const id = `cal${Math.round(Math.random() * 100000)}`;
   const weekends = limit_to_working_days ? false : true; // fullcalendar flag to filter out weekends
   // parse min/max times or use defaults
@@ -545,6 +600,7 @@ const run = async (
     rows.map((row) =>
       eventFromRow(
         row,
+        table_id,
         alwaysAllDay,
         transferedState,
         eventView,
@@ -562,6 +618,13 @@ const run = async (
         }
       )
     )
+  );
+  await addOtherCalendars(
+    events,
+    otherCalendars,
+    extraArgs.req,
+    state,
+    transferedState
   );
   return div(
     script(
@@ -768,7 +831,10 @@ const run = async (
     eventDurationEditable: isResizeable,
     eventResize: (info) => {
       const rowId = info.event.id;
-      const dataObj = { rowId, start: info.event.start, end: info.event.end, };
+      const dataObj = { 
+        rowId, start: info.event.start, end: info.event.end, 
+        tableId: info.event.extendedProps.tableId,
+      };
       view_post('${viewname}', 'update_calendar_event', dataObj,
         (res) => {
       ${
@@ -802,6 +868,7 @@ const run = async (
         const dataObj = { 
           rowId, delta: info.delta, allDay: info.event.allDay, 
           start: info.event.start, end: info.event.end,
+          tableId: info.event.extendedProps.tableId,
         };
         view_post('${viewname}', 'update_calendar_event', dataObj,
           (res) => {
@@ -839,7 +906,10 @@ const run = async (
               headers: {
                 "CSRF-Token": _sc_globalCsrf,
               },
-              data: { rowId: info.event.id },
+              data: {
+                rowId: info.event.id,
+                tableId: info.event.extendedProps.tableId,
+              },
             })
             .done((res) => {
               const updated = res.newEvent;
@@ -903,6 +973,7 @@ const buildResponse = async (
     json: {
       newEvent: await eventFromRow(
         updatedRow[0],
+        table.id,
         allday_field === "Always",
         undefined,
         eventView,
@@ -927,13 +998,13 @@ const buildResponse = async (
  * service to load a calendar event from the db
  */
 const load_calendar_event = async (
-  table_id,
+  unusedTableID, // use tableId for multi table support
   viewname,
   config,
-  { rowId },
+  { rowId, tableId },
   { req }
 ) => {
-  const table = await Table.findOne({ id: table_id });
+  const table = await Table.findOne({ id: tableId });
   const role = req.isAuthenticated() ? req.user.role_id : public_user_role;
   if (role > table.min_role_write) {
     return { json: { error: req.__("Not authorized") } };
@@ -944,7 +1015,7 @@ const load_calendar_event = async (
  * service to update a calendar event in the db
  */
 const update_calendar_event = async (
-  table_id,
+  unusedTableID, // use tableId for multi table support
   viewname,
   {
     start_field,
@@ -958,10 +1029,10 @@ const update_calendar_event = async (
     event_color,
     event_view,
   },
-  { rowId, delta, allDay, start, end },
+  { rowId, tableId, delta, allDay, start, end },
   { req }
 ) => {
-  const table = await Table.findOne({ id: table_id });
+  const table = await Table.findOne({ id: tableId });
   const role = req.isAuthenticated() ? req.user.role_id : public_user_role;
   if (role > table.min_role_write) {
     return { json: { error: req.__("Not authorized") } };
