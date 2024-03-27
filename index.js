@@ -6,6 +6,11 @@ const Form = require("@saltcorn/data/models/form");
 const View = require("@saltcorn/data/models/view");
 const Workflow = require("@saltcorn/data/models/workflow");
 const { stateFieldsToWhere } = require("@saltcorn/data/plugin-helper");
+const {
+  eval_expression,
+  jsexprToWhere,
+} = require("@saltcorn/data/models/expression");
+const { mergeIntoWhere } = require("@saltcorn/data/utils");
 
 const {
   text,
@@ -17,6 +22,7 @@ const {
   pre,
   domReady,
   i,
+  code,
 } = require("@saltcorn/markup/tags");
 
 const { features } = require("@saltcorn/data/db/state");
@@ -49,7 +55,7 @@ const getColorOptions = async (fields) => {
   }
   return result;
 };
-const configuration_workflow = () =>
+const configuration_workflow = (req) =>
   new Workflow({
     steps: [
       {
@@ -188,6 +194,26 @@ const configuration_workflow = () =>
                 attributes: {
                   options: await getColorOptions(fields),
                 },
+              },
+              {
+                name: "include_fml",
+                label: req.__("Row inclusion formula"),
+                class: "validate-expression",
+                sublabel:
+                  req.__("Only include rows where this formula is true. ") +
+                  req.__("In scope:") +
+                  " " +
+                  [
+                    ...fields.map((f) => f.name),
+                    "user",
+                    "year",
+                    "month",
+                    "day",
+                    "today()",
+                  ]
+                    .map((s) => code(s))
+                    .join(", "),
+                type: "String",
               },
               {
                 name: "expand_view",
@@ -591,6 +617,7 @@ const run = async (
     reload_on_edit_in_pop_up,
     event_view,
     reload_on_drag_resize,
+    include_fml,
     ...rest
   },
   state,
@@ -599,9 +626,18 @@ const run = async (
   const table = await Table.findOne({ id: table_id });
   const fields = await table.getFields();
   readState(state, fields);
-  const qstate = await stateFieldsToWhere({ fields, state });
+  const where = await stateFieldsToWhere({ fields, state });
+  if (include_fml) {
+    const ctx = {
+      ...state,
+      user_id: extraArgs.req.user?.id || null,
+      user: extraArgs.req.user,
+    };
+    let where1 = jsexprToWhere(include_fml, ctx, fields);
+    mergeIntoWhere(where, where1 || {});
+  }
   const rows = await table.getJoinedRows({
-    where: qstate,
+    where,
     joinFields: buildJoinFields(event_color),
   });
   const otherCalendars = (await View.find({ viewtemplate: "Calendar" })).filter(
