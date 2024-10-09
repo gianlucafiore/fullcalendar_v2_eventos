@@ -5,7 +5,10 @@ const Table = require("@saltcorn/data/models/table");
 const Form = require("@saltcorn/data/models/form");
 const View = require("@saltcorn/data/models/view");
 const Workflow = require("@saltcorn/data/models/workflow");
-const { stateFieldsToWhere } = require("@saltcorn/data/plugin-helper");
+const {
+  stateFieldsToWhere,
+  readState,
+} = require("@saltcorn/data/plugin-helper");
 const {
   eval_expression,
   jsexprToWhere,
@@ -28,17 +31,6 @@ const {
 const { features } = require("@saltcorn/data/db/state");
 const public_user_role = features?.public_user_role || 10;
 
-const readState = (state, fields) => {
-  fields.forEach((f) => {
-    const current = state[f.name];
-    if (typeof current !== "undefined") {
-      if (f.type.read) state[f.name] = f.type.read(current);
-      else if (f.type === "Key")
-        state[f.name] = current === "null" ? null : +current;
-    }
-  });
-  return state;
-};
 const getColorOptions = async (fields) => {
   const result = [];
   for (const field of fields) {
