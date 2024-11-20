@@ -377,7 +377,8 @@ const configuration_workflow = (req) =>
                 name: "caldav_url",
                 type: "String",
                 label: "CalDAV URL",
-                sublabel: "Also show events from this online calendar",
+                sublabel:
+                  "Experimental. Also show events from this online calendar",
                 required: false,
               },
             ],
