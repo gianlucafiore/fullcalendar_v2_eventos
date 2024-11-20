@@ -373,6 +373,13 @@ const configuration_workflow = (req) =>
                 sublabel: "Max time to display in timeGridWeek, e.g. 20:00",
                 required: false,
               },
+              {
+                name: "caldav_url",
+                type: "String",
+                label: "CalDAV URL",
+                sublabel: "Also show events from this online calendar",
+                required: false,
+              },
             ],
           });
         },
@@ -610,6 +617,7 @@ const run = async (
     event_view,
     reload_on_drag_resize,
     include_fml,
+    caldav_url,
     ...rest
   },
   state,
@@ -682,9 +690,13 @@ const run = async (
     state,
     transferedState
   );
-  return div(
-    script(
-      domReady(`
+  return (
+    (caldav_url
+      ? script({ defer: true, src: "/plugins/public/fullcalendar/caldav.js" })
+      : "") +
+    div(
+      script(
+        domReady(`
   var calendarEl = document.getElementById('${id}');
 
   const locale =
@@ -747,6 +759,7 @@ const run = async (
     }, 200)
   }
   var calendar = new FullCalendar.Calendar(calendarEl, {
+    ${caldav_url ? `plugins: [CalDavPlugin],` : ""}
     eventContent: function(arg) {
       if (!arg.event.extendedProps?.eventHtml) return;
       else return { html: arg.event.extendedProps.eventHtml };
@@ -882,6 +895,15 @@ const run = async (
     }
 
     events: ${JSON.stringify(events)},
+    ${
+      caldav_url
+        ? `eventSources: [      
+      {
+        url: "${caldav_url}",
+        format: "caldav",        
+    }],`
+        : ""
+    }
     editable: true, 
     eventResizableFromStart: isResizeable,
     eventDurationEditable: isResizeable,
@@ -994,8 +1016,9 @@ const run = async (
     },
   });
   calendar.render();`)
-    ),
-    div({ id })
+      ),
+      div({ id })
+    )
   );
 };
 /*
