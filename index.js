@@ -783,6 +783,7 @@ const run = async (
       calendar.setOption("headerToolbar", toolbar);
       addOverflowHidden();
     },
+    timeZone:'America/Argentina/Buenos_Aires',
     locale: locale,
     headerToolbar: {
       left: 'prev,next today${view_to_create ? " add" : ""}',
