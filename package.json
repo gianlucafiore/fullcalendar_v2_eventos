@@ -9,7 +9,7 @@
   },
   "author": "Tom Nielsen",
   "license": "MIT",
-  "repository": "github:saltcorn/fullcalendar",
+  "repository": "github:gianlucafiore/fullcalendar",
   "eslintConfig": {
     "extends": "eslint:recommended",
     "parserOptions": {
