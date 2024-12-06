@@ -878,11 +878,7 @@ const run = async (
         ? `
     selectable: true,
     select: function(info) {
-      let url = '/view/${view_to_create}?${start_field}=' + encodeURIComponent(info.startStr) +'Z -03:00' +'&horas_por_contrato=7'+ ${
-            end_field
-              ? `+ '&` + end_field + `=' + encodeURIComponent(info.endStr)`
-              : ""
-          }
+      let url = '/view/${view_to_create}?${start_field}=' + encodeURIComponent(info.startStr) +'Z -03:00' +' &horas_por_contrato=7 '
       ${
         switch_to_duration && duration_field
           ? `+ '&` + duration_field + `=' + durationFromInfo(info)`
