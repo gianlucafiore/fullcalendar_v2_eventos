@@ -1246,7 +1246,7 @@ module.exports = {
   plugin_name: "fullcalendar_v2_eventos",
   viewtemplates: [
     {
-      name: "Calendar",
+      name: "Calendar_v2_eventos",
       description:
         "Displays items on a calendar, with options for month, week, agenda, and others.",
       display_state_form: false,
