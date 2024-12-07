@@ -9,7 +9,7 @@
   },
   "author": "Gian",
   "license": "MIT",
-  "repository": "github:gianlucafiore/fullcalendar",
+  "repository": "github:gianlucafiore/fullcalendar_v2_eventos",
   "eslintConfig": {
     "extends": "eslint:recommended",
     "parserOptions": {
