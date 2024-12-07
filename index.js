@@ -783,7 +783,6 @@ const run = async (
       calendar.setOption("headerToolbar", toolbar);
       addOverflowHidden();
     },
-    timeZone:'America/Argentina/Buenos_Aires',
     locale: locale,
     headerToolbar: {
       left: 'prev,next today${view_to_create ? " add" : ""}',
@@ -878,7 +877,7 @@ const run = async (
         ? `
     selectable: true,
     select: function(info) {
-      let url = '/view/${view_to_create}?${start_field}=' + encodeURIComponent(info.startStr) +'Z -03:00' +'&horas_por_contrato=7'
+      let url = '/view/${view_to_create}?fecha=' + encodeURIComponent(info.startStr) +'Z -03:00' +'&horas_por_contrato=7'
       ${
         switch_to_duration && duration_field
           ? `+ '&` + duration_field + `=' + 7`
