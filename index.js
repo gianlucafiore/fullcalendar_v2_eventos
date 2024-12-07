@@ -1243,7 +1243,7 @@ const connectedObjects = async ({
 module.exports = {
   sc_plugin_api_version: 1,
   headers,
-  plugin_name: "fullcalendar",
+  plugin_name: "fullcalendar_v2_eventos",
   viewtemplates: [
     {
       name: "Calendar",
