@@ -785,7 +785,7 @@ const run = async (
     },
     locale: locale,
     headerToolbar: {
-      left: 'prev,next today${view_to_create ? " add" : ""}',
+      left: 'prev,next today',
       center: 'title',
       right: '${calendar_view_options}',
     },
