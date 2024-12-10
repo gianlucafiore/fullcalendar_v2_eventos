@@ -1183,13 +1183,13 @@ const headers = [
     </style>`,
   },
   {
-    script: "/plugins/public/fullcalendar/main.min.js",
+    script: "/plugins/public/fullcalendar_v2_eventos/main.min.js",
   },
   {
-    script: "/plugins/public/fullcalendar/locales-all.min.js",
+    script: "/plugins/public/fullcalendar_v2_eventos/locales-all.min.js",
   },
   {
-    css: "/plugins/public/fullcalendar/main.min.css",
+    css: "/plugins/public/fullcalendar_v2_eventos/main.min.css",
   },
 ];
 const connectedObjects = async ({
