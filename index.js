@@ -760,7 +760,7 @@ const run = async (
     }, 200)
   }
   var calendar = new FullCalendar.Calendar(calendarEl, {
-    ${`plugins: [multiMonthPlugin]`}
+    ${`plugins: [multiMonthPlugin],`}
     eventContent: function(arg) {
       if (!arg.event.extendedProps?.eventHtml) return;
       else return { html: arg.event.extendedProps.eventHtml };
