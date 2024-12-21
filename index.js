@@ -1189,13 +1189,10 @@ const headers = [
     script: "/plugins/public/fullcalendar_v2_eventos/locales-all.min.js",
   },
   {
-    script: "/plugins/public/fullcalendar_v2_eventos/multimonth/main.min.js",
+    script: "/plugins/public/fullcalendar_v2_eventos/multimonth/index.js",
   },
   {
     css: "/plugins/public/fullcalendar_v2_eventos/main.min.css",
-  },
-  {
-    css: "/plugins/public/fullcalendar_v2_eventos/multimonth/main.min.css",
   }
 
 ];
