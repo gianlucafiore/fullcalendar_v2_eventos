@@ -692,9 +692,7 @@ const run = async (
     transferedState
   );
   return (
-    (caldav_url
-      ? script({ defer: true, src: "/plugins/public/fullcalendar/caldav.js" })
-      : "") +
+    script({ defer: true, src: "/plugins/public/fullcalendar/multimonth/index.js" }) +
     div(
       script(
         domReady(`
